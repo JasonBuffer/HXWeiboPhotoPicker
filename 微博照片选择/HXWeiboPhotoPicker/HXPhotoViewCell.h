@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "HXPhotoModel.h"
+#import "HXPhotoManager.h"
 
 @class HXPhotoViewCell;
 @protocol HXPhotoViewCellDelegate <NSObject>
@@ -26,7 +27,9 @@
 @property (weak, nonatomic) UIView *maskView;
 @property (weak, nonatomic) UIButton *selectBtn;
 @property (assign, nonatomic) int32_t requestID;
+@property (strong , nonatomic)HXPhotoManager *manager;
 
 - (void)startLivePhoto;
 - (void)stopLivePhoto;
+- (void)reloadWithManager:(HXPhotoManager *)manager;
 @end

@@ -82,7 +82,7 @@
     self.liveIcon = liveIcon;
     
     UIView *maskView = [[UIView alloc] initWithFrame:self.bounds];
-    maskView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.4];
+    maskView.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.6];
     maskView.hidden = YES;
     [self.contentView addSubview:maskView];
     self.maskView = maskView;
@@ -191,7 +191,6 @@
     if (self.model.type == HXPhotoModelMediaTypeCamera) {
         return;
     }
-    
     if ([self.delegate respondsToSelector:@selector(cellDidSelectedBtnClick:Model:)]) {
         [self.delegate cellDidSelectedBtnClick:self Model:self.model];
     }
@@ -267,6 +266,16 @@
     }
     self.maskView.hidden = !model.selected;
     self.selectBtn.selected = model.selected;
+}
+
+- (void)reloadWithManager:(HXPhotoManager *)manager{
+     if (manager.selectedList.count == manager.maxNum && !self.model.selected) {  // 已经达到最大选择数
+         [self.maskView setHidden:NO];
+         [self.selectBtn setHidden:YES];
+     }else{
+         [self.maskView setHidden:YES];
+         [self.selectBtn setHidden:NO];
+     }
 }
 
 @end

@@ -289,7 +289,7 @@
     }
     button.selected = !button.selected;
     model.selected = button.selected;
-    
+    /*
     if (self.manager.selectedList.count > 0) {
         self.navigationItem.rightBarButtonItem.enabled = YES;
         [self.rightBtn setTitle:[NSString stringWithFormat:@"下一步(%ld)",self.manager.selectedList.count] forState:UIControlStateNormal];
@@ -304,7 +304,7 @@
         self.rightBtn.frame = CGRectMake(0, 0, 60, 25);
         self.rightBtn.layer.borderWidth = 0;
     }
-    
+    */
     if ([self.delegate respondsToSelector:@selector(didSelectedClick:AddOrDelete:)]) {
         [self.delegate didSelectedClick:model AddOrDelete:button.selected];
     }

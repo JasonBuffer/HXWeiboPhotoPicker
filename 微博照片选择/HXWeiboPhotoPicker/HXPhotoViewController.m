@@ -15,8 +15,16 @@
 #import "HXCameraViewController.h"
 #import "UIView+HXExtension.h"
 #import "HXFullScreenCameraViewController.h"
+
 static NSString *PhotoViewCellId = @"PhotoViewCellId";
-@interface HXPhotoViewController ()<UICollectionViewDataSource,UICollectionViewDelegate,CAAnimationDelegate,UIViewControllerPreviewingDelegate,HXAlbumListViewDelegate,HXPhotoPreviewViewControllerDelegate,HXPhotoBottomViewDelegate,HXVideoPreviewViewControllerDelegate,HXCameraViewControllerDelegate,HXPhotoViewCellDelegate,UIAlertViewDelegate,HXFullScreenCameraViewControllerDelegate>
+
+@interface HXPhotoViewController ()
+<UICollectionViewDataSource,UICollectionViewDelegate,
+CAAnimationDelegate,UIViewControllerPreviewingDelegate,
+HXAlbumListViewDelegate,HXPhotoPreviewViewControllerDelegate,
+HXPhotoBottomViewDelegate,HXVideoPreviewViewControllerDelegate,
+HXCameraViewControllerDelegate,HXPhotoViewCellDelegate,
+UIAlertViewDelegate,HXFullScreenCameraViewControllerDelegate>
 {
     CGRect _originalFrame;
 }
@@ -27,7 +35,11 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
 @property (weak, nonatomic) HXAlbumTitleButton *titleBtn;
 @property (strong, nonatomic) UIButton *rightBtn;
 @property (strong, nonatomic) UIView *albumsBgView;
-@property (weak, nonatomic) HXPhotoBottomView *bottomView;
+//HXPhotoBottomView 包含发送原图和预览功能；
+//@property (weak, nonatomic) HXPhotoBottomView *bottomView;
+@property (strong, nonatomic) UIView *bottomView;
+@property (strong, nonatomic) UIButton *sureButton;
+@property (strong, nonatomic) UILabel *selectedLabel;
 @property (strong, nonatomic) NSMutableArray *videos;
 @property (strong, nonatomic) NSMutableArray *objs;
 @property (strong, nonatomic) UIActivityIndicatorView *indica;
@@ -263,22 +275,7 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
     self.automaticallyAdjustsScrollViewInsets = NO;
     self.navigationController.navigationBar.tintColor = [UIColor blackColor];
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"取消" style:UIBarButtonItemStylePlain target:self action:@selector(cancelClick)];
-    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:self.rightBtn];
-    if (self.manager.selectedList.count > 0) {
-        self.navigationItem.rightBarButtonItem.enabled = YES;
-        [self.rightBtn setTitle:[NSString stringWithFormat:@"下一步(%ld)",self.manager.selectedList.count] forState:UIControlStateNormal];
-        [self.rightBtn setBackgroundColor:[UIColor colorWithRed:253/255.0 green:142/255.0 blue:36/255.0 alpha:1]];
-        self.rightBtn.layer.borderWidth = 0;
-        CGFloat rightBtnH = self.rightBtn.frame.size.height;
-        CGFloat rightBtnW = [HXPhotoTools getTextWidth:self.rightBtn.currentTitle withHeight:rightBtnH fontSize:14];
-        self.rightBtn.frame = CGRectMake(0, 0, rightBtnW + 20, rightBtnH);
-    }else {
-        self.navigationItem.rightBarButtonItem.enabled = NO;
-        [self.rightBtn setTitle:@"下一步" forState:UIControlStateNormal];
-        [self.rightBtn setBackgroundColor:[UIColor whiteColor]];
-        self.rightBtn.frame = CGRectMake(0, 0, 60, 25);
-        self.rightBtn.layer.borderWidth = 0.5;
-    }
+    //self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:self.rightBtn];
     
     HXAlbumTitleButton *titleBtn = [HXAlbumTitleButton buttonWithType:UIButtonTypeCustom];
     [titleBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
@@ -308,7 +305,7 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
     self.collectionView.backgroundColor = [UIColor whiteColor];
     [self.collectionView registerClass:[HXPhotoViewCell class] forCellWithReuseIdentifier:PhotoViewCellId];
     [self.view addSubview:self.collectionView];
-    
+    /*
     HXPhotoBottomView *bottomView = [[HXPhotoBottomView alloc] initWithFrame:CGRectMake(0, heght - 50, width, 50)];
     bottomView.delegate = self;
     if (self.manager.selectedList.count > 0) {
@@ -336,6 +333,36 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
         [bottomView.originalBtn setTitle:[NSString stringWithFormat:@"原图(%@)",self.manager.photosTotalBtyes] forState:UIControlStateNormal];
         
         bottomView.originalBtn.frame = CGRectMake(originalBtnX, originalBtnY, originalBtnW+totalW  , originalBtnH);
+    }
+    */
+    self.bottomView = [[UIView alloc] initWithFrame:CGRectMake(0, heght - 50, width, 50)];
+    [self.bottomView setBackgroundColor:[UIColor whiteColor]];
+    [self.view addSubview:self.bottomView];
+    self.sureButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.sureButton.layer.cornerRadius = 3.0;
+    [self.sureButton setFrame:CGRectMake(self.bottomView.frame.size.width - 130, 5, 120, 40)];
+    [self.sureButton setTitle:@"确定" forState:UIControlStateNormal];
+    [self.sureButton setBackgroundColor:[UIColor colorWithRed:215/255.0 green:215/255.0 blue:215/255.0 alpha:1]];
+    [self.sureButton addTarget:self action:@selector(didNextClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.bottomView addSubview:self.sureButton];
+   
+    self.selectedLabel = [[UILabel alloc] initWithFrame:CGRectMake(10,
+                                                                   5,
+                                                                   self.bottomView.frame.size.width - self.sureButton.frame.size.width -30,
+                                                                   40)];
+    self.selectedLabel.font = [UIFont systemFontOfSize:15.0f];
+    [self.selectedLabel setText:@"已选择（0/0）"];
+    [self.selectedLabel setTextColor:[UIColor colorWithRed:145/255.0 green:155/255.0 blue:159/255.0 alpha:1]];
+    [self.bottomView addSubview:self.selectedLabel];
+    
+    if (self.manager.selectedList.count > 0) {
+        [self.sureButton setEnabled:YES];
+        [self.selectedLabel setText:[NSString stringWithFormat:@"已选择（%ld/%ld）",self.manager.selectedList.count,self.manager.maxNum]];
+        [self.sureButton setBackgroundColor:[UIColor colorWithRed:0/255.0 green:188/255.0 blue:197/255.0 alpha:1]];
+    }else {
+        [self.sureButton setEnabled:NO];
+        [self.selectedLabel setText:[NSString stringWithFormat:@"已选择（0/%ld）",self.manager.maxNum]];
+        [self.sureButton setBackgroundColor:[UIColor colorWithRed:215/255.0 green:215/255.0 blue:215/255.0 alpha:1]];
     }
     
     [self.view addSubview:self.albumsBgView];
@@ -380,6 +407,8 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
     HXPhotoModel *model = self.objs[indexPath.item];
     cell.delegate = self;
     cell.model = model;
+    cell.manager = self.manager;
+    [cell reloadWithManager:self.manager];
     return cell;
 }
 //- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
@@ -559,6 +588,9 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
     HXPhotoViewCell *cell = (HXPhotoViewCell *)[self.collectionView cellForItemAtIndexPath:indexPath];
     self.currentIndexPath = indexPath;
     HXPhotoModel *model = self.objs[indexPath.item];
+    if (self.manager.selectedList.count == self.manager.maxNum && !model.selected) {
+        return;
+    }
     if (model.type == HXPhotoModelMediaTypePhoto || (model.type == HXPhotoModelMediaTypePhotoGif || model.type == HXPhotoModelMediaTypeLivePhoto)) {
         HXPhotoPreviewViewController *vc = [[HXPhotoPreviewViewController alloc] init];
         vc.modelList = self.photos;
@@ -837,10 +869,12 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
  cell选中代理
  */
 - (void)cellDidSelectedBtnClick:(HXPhotoViewCell *)cell Model:(HXPhotoModel *)model {
+   
     if (!cell.selectBtn.selected) { // 弹簧果冻动画效果
-        if (self.manager.selectedList.count == self.manager.maxNum) {
+        
+        /*
+        if (self.manager.selectedList.count == self.manager.maxNum) {  // 已经达到最大选择数
             [self.view showImageHUDText:[NSString stringWithFormat:@"最多只能选择%ld个",self.manager.maxNum]];
-            // 已经达到最大选择数
             return;
         }
         if (self.manager.type == HXPhotoManagerSelectedTypePhotoAndVideo) {
@@ -876,9 +910,8 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
                 }
             }
         }else if (self.manager.type == HXPhotoManagerSelectedTypePhoto) {
-            if (self.manager.selectedPhotos.count == self.manager.photoMaxNum) {
+            if (self.manager.selectedPhotos.count == self.manager.photoMaxNum) { // 已经达到图片最大选择数
                 [self.view showImageHUDText:[NSString stringWithFormat:@"最多只能选择%ld张图片",self.manager.photoMaxNum]];
-                // 已经达到图片最大选择数
                 return;
             }
         }else if (self.manager.type == HXPhotoManagerSelectedTypeVideo) {
@@ -894,20 +927,18 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
                 return;
             }
         }
-        
-        cell.maskView.hidden = NO;
+        */
+        //cell.maskView.hidden = NO;
         CAKeyframeAnimation *anim = [CAKeyframeAnimation animationWithKeyPath:@"transform.scale"];
         anim.duration = 0.25;
         anim.values = @[@(1.2),@(0.8),@(1.1),@(0.9),@(1.0)];
         [cell.selectBtn.layer addAnimation:anim forKey:@""];
-    }else {
-        cell.maskView.hidden = YES;
     }
     cell.selectBtn.selected = !cell.selectBtn.selected;
     cell.model.selected = cell.selectBtn.selected;
     BOOL selected = cell.selectBtn.selected;
-    
     if (selected) { // 选中之后需要做的
+       
         if (model.type != HXPhotoModelMediaTypeCameraVideo && model.type != HXPhotoModelMediaTypeCameraPhoto) {
             model.thumbPhoto = cell.imageView.image;
         }
@@ -931,6 +962,9 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
         }
         [self.manager.selectedList addObject:model];
         self.albumModel.selectedCount++;
+        if (self.manager.selectedList.count == self.manager.maxNum) {  // 已经达到最大选择数
+            [self.collectionView reloadData];
+        }
     }else { // 取消选中之后的
         if (model.type != HXPhotoModelMediaTypeCameraVideo && model.type != HXPhotoModelMediaTypeCameraPhoto) {
             model.thumbPhoto = nil;
@@ -968,9 +1002,13 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
             }
             i++;
         }
+        if (self.manager.selectedList.count == self.manager.maxNum - 1) {  // 取消最大数量选中状态
+            [self.collectionView reloadData];
+        }
     }
     // 改变 预览、原图 按钮的状态
     [self changeButtonClick:model];
+  
 }
 
 /**
@@ -1019,6 +1057,7 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
                         isVideo = YES;
                     }
                 }
+                /*
                 if (self.manager.isOriginal) { // 原图按钮已经选中
                     // 改变原图按钮的状态和计算图片原图的大小
                     [self changeOriginalState:YES IsChange:YES];
@@ -1032,12 +1071,16 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
                     self.bottomView.originalBtn.selected = NO;
                     self.manager.isOriginal = NO;
                 }
-            }else {
+                 */
+            }
+            /*
+            else {
                 self.bottomView.originalBtn.enabled = YES;
             }
+             */
         }
+        /*
         self.bottomView.previewBtn.enabled = YES;
-        
         self.navigationItem.rightBarButtonItem.enabled = YES;
         [self.rightBtn setTitle:[NSString stringWithFormat:@"下一步(%ld)",self.manager.selectedList.count] forState:UIControlStateNormal];
         [self.rightBtn setBackgroundColor:[UIColor colorWithRed:253/255.0 green:142/255.0 blue:36/255.0 alpha:1]];
@@ -1045,9 +1088,13 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
         CGFloat rightBtnH = self.rightBtn.frame.size.height;
         CGFloat rightBtnW = [HXPhotoTools getTextWidth:self.rightBtn.currentTitle withHeight:rightBtnH fontSize:14];
         self.rightBtn.frame = CGRectMake(0, 0, rightBtnW + 20, rightBtnH);
+         */
+        [self.sureButton setEnabled:YES];
+        [self.selectedLabel setText:[NSString stringWithFormat:@"已选择（%ld/%ld）",self.manager.selectedList.count,self.manager.maxNum]];
+        [self.sureButton setBackgroundColor:[UIColor colorWithRed:0/255.0 green:188/255.0 blue:197/255.0 alpha:1]];
     }else { // 没有选中时 全部恢复成初始状态
+        /*
         [self changeOriginalState:NO IsChange:NO];
-        self.manager.isOriginal = NO;
         self.bottomView.originalBtn.selected = NO;
         self.bottomView.previewBtn.enabled = NO;
         self.bottomView.originalBtn.enabled = NO;
@@ -1056,6 +1103,11 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
         [self.rightBtn setBackgroundColor:[UIColor whiteColor]];
         self.rightBtn.frame = CGRectMake(0, 0, 60, 25);
         self.rightBtn.layer.borderWidth = 0.5;
+        */
+        self.manager.isOriginal = NO;
+        [self.sureButton setEnabled:NO];
+        [self.selectedLabel setText:[NSString stringWithFormat:@"已选择（0/%ld）",self.manager.maxNum]];
+        [self.sureButton setBackgroundColor:[UIColor colorWithRed:215/255.0 green:215/255.0 blue:215/255.0 alpha:1]];
     }
 }
 
@@ -1098,7 +1150,7 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
         // 记录是否原图
         self.manager.isOriginal = button.selected;
         // 改变原图按钮状态
-        [self changeOriginalState:button.selected IsChange:NO];
+        //[self changeOriginalState:button.selected IsChange:NO];
     }
 }
 
@@ -1127,7 +1179,7 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
  
  @param selected 是否选中
  @param isChange 是否改变成初始状态
- */
+ 
 - (void)changeOriginalState:(BOOL)selected IsChange:(BOOL)isChange
 {
     if (selected) { // 选中时
@@ -1168,6 +1220,7 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
         self.bottomView.originalBtn.frame = _originalFrame;
     }
 }
+ */
 
 /**
  查看图片时点击下一步按钮的代理
@@ -1213,7 +1266,7 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
  小菊花
  
  @return 小菊花
- */
+ 
 - (UIActivityIndicatorView *)indica
 {
     if (!_indica) {
@@ -1227,6 +1280,7 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
     }
     return _indica;
 }
+ */
 
 /**
  下一步按钮
@@ -1249,6 +1303,7 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
         [_rightBtn addTarget:self action:@selector(didNextClick:) forControlEvents:UIControlEventTouchUpInside];
         _rightBtn.titleLabel.font = [UIFont systemFontOfSize:14];
         _rightBtn.frame = CGRectMake(0, 0, 60, 25);
+        [_rightBtn setHidden:YES];
     }
     return _rightBtn;
 }
@@ -1285,7 +1340,7 @@ static NSString *PhotoViewCellId = @"PhotoViewCellId";
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
-        self.backgroundColor = [UIColor whiteColor];
+        self.backgroundColor = [UIColor redColor];
         [self setup];
     }
     return self;

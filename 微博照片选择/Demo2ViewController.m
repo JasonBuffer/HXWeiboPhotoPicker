@@ -63,13 +63,13 @@
 - (HXPhotoManager *)manager
 {
     if (!_manager) {
-        _manager = [[HXPhotoManager alloc] initWithType:HXPhotoManagerSelectedTypePhotoAndVideo];
+        _manager = [[HXPhotoManager alloc] initWithType:HXPhotoManagerSelectedTypePhoto];
         _manager.openCamera = YES;
-        _manager.outerCamera = YES;
+        _manager.outerCamera = NO;
         _manager.showFullScreenCamera = YES;
         _manager.photoMaxNum = 4;
-        _manager.videoMaxNum = 4;
-        _manager.maxNum = 8;
+        _manager.videoMaxNum = 0;
+        _manager.maxNum = 4;
     }
     return _manager;
 }
