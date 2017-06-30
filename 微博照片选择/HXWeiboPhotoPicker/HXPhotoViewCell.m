@@ -108,17 +108,17 @@
     [selectBtn setImage:[HXPhotoTools hx_imageNamed:@"compose_guide_check_box_default@2x.png"] forState:UIControlStateNormal];
     [selectBtn setImage:[HXPhotoTools hx_imageNamed:@"compose_guide_check_box_right@2x.png"] forState:UIControlStateSelected];
     [selectBtn addTarget:self action:@selector(didSelectClick:) forControlEvents:UIControlEventTouchUpInside];
-    CGFloat imageWidth = selectBtn.currentImage.size.width;
-    CGFloat imageHeight = selectBtn.currentImage.size.height;
-    selectBtn.frame = CGRectMake(width - imageWidth, 0, imageWidth, imageHeight);
-    selectBtn.center = CGPointMake(selectBtn.center.x, liveBtn.center.y);
-    liveIcon.center = CGPointMake(liveIcon.center.x, liveBtn.center.y);
+    CGFloat imageWidth = selectBtn.currentImage.size.width+10;
+    CGFloat imageHeight = selectBtn.currentImage.size.height+10;
+    selectBtn.frame = CGRectMake(width - imageWidth , 0, imageWidth, imageHeight);
+    //selectBtn.center = CGPointMake(selectBtn.center.x, liveBtn.center.y);
+    //liveIcon.center = CGPointMake(liveIcon.center.x, liveBtn.center.y);
     [selectBtn setEnlargeEdgeWithTop:0 right:0 bottom:30 left:30];
     [self.contentView addSubview:selectBtn];
     self.selectBtn = selectBtn;
     
     UIButton *cameraBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [cameraBtn setBackgroundColor:[UIColor whiteColor]];
+    [cameraBtn setBackgroundColor:[UIColor colorWithRed:76/255.0 green:76/255.0 blue:76/255.0 alpha:1]];
     cameraBtn.userInteractionEnabled = NO;
     [self.contentView addSubview:cameraBtn];
     cameraBtn.frame = self.bounds;

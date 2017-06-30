@@ -15,7 +15,7 @@
 #import "HXCameraViewController.h"
 #import "UIView+HXExtension.h"
 #import "HXFullScreenCameraViewController.h"
-#define Spacing 3 // 每个item的间距
+#define Spacing 10 // 每个item的间距
 #define LineNum 4 // 每行个数
 @interface HXPhotoView ()<HXCollectionViewDataSource,HXCollectionViewDelegate,HXPhotoViewControllerDelegate,HXPhotoSubViewCellDelegate,UIActionSheetDelegate,HXCameraViewControllerDelegate,UIAlertViewDelegate,HXFullScreenCameraViewControllerDelegate>
 @property (strong, nonatomic) NSMutableArray *dataList;

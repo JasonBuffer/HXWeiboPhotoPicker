@@ -200,8 +200,7 @@
     CGFloat height = self.frame.size.height;
     CGFloat deleteBtnW = self.deleteBtn.currentImage.size.width;
     CGFloat deleteBtnH = self.deleteBtn.currentImage.size.height;
-    self.deleteBtn.frame = CGRectMake(width - deleteBtnW, 0, deleteBtnW, deleteBtnH);
-    
+    self.deleteBtn.frame = CGRectMake(width - deleteBtnW + 8, -10, deleteBtnW, deleteBtnH);
     self.bottomView.frame = CGRectMake(0, height - 25, width, 25);
     CGFloat iconWidth = self.videoIcon.image.size.width;
     CGFloat iconHeight = self.videoIcon.image.size.height;

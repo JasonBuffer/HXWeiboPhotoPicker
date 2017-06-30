@@ -325,6 +325,7 @@
         [_rightBtn addTarget:self action:@selector(didNextClick:) forControlEvents:UIControlEventTouchUpInside];
         _rightBtn.titleLabel.font = [UIFont systemFontOfSize:14];
         _rightBtn.frame = CGRectMake(0, 0, 60, 25);
+        [_rightBtn setHidden:YES];
     }
     return _rightBtn;
 }

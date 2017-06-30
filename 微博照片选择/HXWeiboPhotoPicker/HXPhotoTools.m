@@ -15,7 +15,10 @@
 @implementation HXPhotoTools
 
 + (UIImage *)hx_imageNamed:(NSString *)imageName {
-    UIImage *image = [UIImage imageNamed:[HXBUNDLE_NAME stringByAppendingPathComponent:imageName]];
+    
+    NSString *image_Name = [HXBUNDLE_NAME stringByAppendingPathComponent:imageName];
+    
+    UIImage *image = [UIImage imageNamed:image_Name];
     if (image) {
         return image;
     } else {
